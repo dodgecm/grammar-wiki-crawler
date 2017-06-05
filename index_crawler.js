@@ -2,6 +2,7 @@
 // import cheerio from 'cheerio'
 // import URL from 'url-parse'
 
+const _ = require('lodash')
 const request = require('request')
 const cheerio = require('cheerio')
 const URL = require('url-parse')
@@ -18,18 +19,21 @@ const INDEX_URLS = [
 
 const DEBUG_URL = 'https://resources.allsetlearning.com/chinese/grammar/A1_grammar_points'
 
-const pagesToVisit = []
-let baseUrl
-
-crawlIndexes(INDEX_URLS)
-// crawlIndexes([DEBUG_URL])
+// crawlIndexes(INDEX_URLS)
+crawlIndexes([DEBUG_URL])
 
 function crawlIndexes(indexes) {
+  const allLinks = []
+  const finishedCallback = _.after(indexes.length, () => {
+    console.log(allLinks)
+  })
+
   for (let i = 0; i < indexes.length; i++) {
     const index = indexes[i]
-    const url = new URL(index)
-    baseUrl = `${url.protocol}//${url.hostname}`
-    loadPage(index, parsePage)
+    loadPage(index, _.partialRight(parsePage, links => {
+      allLinks.push(...links)
+      finishedCallback()
+    }))
   }
 }
 
@@ -38,7 +42,7 @@ function loadPage(index, callback) {
   const cachePath = `cache/${indexHash}.html`
 
   fs.readFile(cachePath, (readError, data) => {
-    if (!readError) { callback(data) }
+    if (!readError) { callback(index, data) }
     else {
       request(index, (error, response, body) => {
         // Check status code (200 is HTTP OK)
@@ -50,22 +54,30 @@ function loadPage(index, callback) {
           console.log(`Wrote ${cachePath} to cache.`)
         })
 
-        callback(body)
+        callback(index, body)
       })
     }
   })
 }
 
-function parsePage(body) {
+function parsePage(index, body, callback) {
   // Parse the document body
   const $ = cheerio.load(body)
-  collectInternalLinks($)
-}
 
-function collectInternalLinks($) {
-  const relativeLinks = $("a[href^='/']")
-  console.log(`Found ${relativeLinks.length} relative links on page`)
-  relativeLinks.each(() => {
-    pagesToVisit.push(baseUrl + $(this).attr('href'))
+  const linkValidator = RegExp('.*ASG\\w{5}$')
+  const filteredTags = _.filter(
+    $("a[href^='/']"),
+    link => linkValidator.test(link.attribs.href))
+  const filteredLinks = _.map(filteredTags, tag => tag.attribs.href)
+
+  const url = new URL(index)
+  const baseUrl = `${url.protocol}//${url.hostname}`
+  const absolutePaths = []
+
+  _.forEach(filteredLinks, link => {
+    absolutePaths.push(baseUrl + link)
   })
+
+  if (callback) { callback(absolutePaths) }
+  return absolutePaths
 }
