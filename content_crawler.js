@@ -27,33 +27,46 @@ function parseIndexPage(index, body, descriptor, callback) {
     // Filter out examples of right vs wrong grammar segments, etc
     if ($(elem).hasClass('x') ||
     $(elem).hasClass('o') ||
-    $(elem).parents().hasClass('liju-en')) {
+    $(elem).parents().hasClass('liju-en') ||
+    $(elem).children('a').length > 0) {
       console.log('Filtered out', $(elem).text())
       return true
     }
 
-    if ($(elem).parent().hasClass('dialog')) {
+    const dialogExp = RegExp('^[A-Z]:')
+    if ($(elem).parent().hasClass('dialog') ||
+        dialogExp.test($(elem).text().trim())) {
       // We filter out the second person's line to combine the dialogue into one card
       if ($(elem).prev().length !== 0) {
         console.log('Filtered out', $(elem).text())
       } else {
+        const dialogueSegments = { hanzi: [], '.pinyin': [], '.trans': [], '.expl': [] }
+        const terms = ['.pinyin', '.trans', '.expl']
+
+        dialogueSegments.hanzi.push($(elem).contents().not(_.join(terms, ', ')).text().replace(/\s+/g, ''))
+        $(elem).nextAll('li').each((i, example) => {
+          dialogueSegments.hanzi.push($(example).contents().not(_.join(terms, ', ')).text().replace(/\s+/g, ''))
+        })
+
+        _.forEach(terms, term => {
+          dialogueSegments[term].push($(elem).find(term).text().trim())
+          $(elem).nextAll('li').each((i, example) => {
+            dialogueSegments[term].push($(example).find(term).text().trim())
+          })
+          _.remove(dialogueSegments[term], term => term.length === 0)
+        })
+
+        if (dialogueSegments.hanzi.length === 0 ||
+        dialogueSegments['.trans'].length === 0) {
+          console.log('Filtered out', $(elem).text())
+          return true
+        }
+
         examples.push({
-          hanzi: _.join([
-            $(elem).contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, ''),
-            $(elem).next().contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, ''),
-          ], '\n'),
-          pinyin: _.join([
-            $(elem).find('.pinyin').text().trim(),
-            $(elem).next().find('.pinyin').text().trim(),
-          ], '\n'),
-          trans: _.join([
-            $(elem).find('.trans').text().trim(),
-            $(elem).next().find('.trans').text().trim(),
-          ], '\n'),
-          expl: _.join([
-            $(elem).find('.expl').text().trim(),
-            $(elem).next().find('.expl').text().trim(),
-          ], '\n'),
+          hanzi: _.join(dialogueSegments.hanzi, '<br />'),
+          pinyin: _.join(dialogueSegments['.pinyin'], '<br />'),
+          trans: _.join(dialogueSegments['.trans'], '<br />'),
+          expl: _.join(dialogueSegments['.expl'], ''),
         })
       }
       return true

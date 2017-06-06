@@ -4,7 +4,16 @@ const request = require('request')
 const fs = require('fs')
 const util = require('util')
 
+const HUMAN_READABLE_OUTPUT = false
+
+function createDirSync(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir)
+  }
+}
+
 function loadPage(index, callback) {
+  createDirSync('cache')
   const indexHash = crypto.createHash('md5').update(index).digest('hex')
   const cachePath = `cache/${indexHash}.html`
 
@@ -27,19 +36,27 @@ function loadPage(index, callback) {
 }
 
 function savePage(descriptor, callback) {
-  const cachePath = `output/${_.padStart(descriptor.id, 4, '0')}_${descriptor.url_id}.json`
+  const outputDir = 'output'
+  createDirSync(outputDir)
+
+  const cachePath = `${outputDir}/${_.padStart(descriptor.id, 4, '0')}_${descriptor.url_id}.json`
   fs.writeFile(cachePath, JSON.stringify(descriptor), writeError => {
     if (writeError) { throw writeError }
     console.log(`Wrote ${descriptor.title} to output.`)
     callback()
   })
 
-  const humanReadablePath = `output/${_.padStart(descriptor.id, 4, '0')}_${descriptor.url_id}.txt`
-  fs.writeFile(humanReadablePath, util.inspect(descriptor), () => {})
+  if (HUMAN_READABLE_OUTPUT) {
+    const humanReadablePath = `output/${_.padStart(descriptor.id, 4, '0')}_${descriptor.url_id}.txt`
+    fs.writeFile(humanReadablePath, util.inspect(descriptor), () => {})
+  }
 }
 
 function saveDeck(callback) {
-  const files = fs.readdirSync('output')
+  const outputDir = 'output'
+  createDirSync(outputDir)
+
+  const files = fs.readdirSync(outputDir)
   _.remove(files, file => !_.endsWith(file, '.json'))
 
   const writeStream = fs.createWriteStream('output/deck.txt')
@@ -49,7 +66,7 @@ function saveDeck(callback) {
     const tags = _.join([level, category, subcategory], ' ')
     examples.forEach(({ hanzi, pinyin, trans, expl }) => {
       const row = [hanzi, pinyin, trans, expl, title, structure, url, tags]
-      // const row = [hanzi, pinyin]
+      // const row = [hanzi, trans, title]
       writeStream.write(`${_.join(row, '\t')}\n`)
     })
   })
