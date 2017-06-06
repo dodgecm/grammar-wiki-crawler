@@ -32,6 +32,33 @@ function parseIndexPage(index, body, descriptor, callback) {
       return true
     }
 
+    if ($(elem).parent().hasClass('dialog')) {
+      // We filter out the second person's line to combine the dialogue into one card
+      if ($(elem).prev().length !== 0) {
+        console.log('Filtered out', $(elem).text())
+      } else {
+        examples.push({
+          hanzi: _.join([
+            $(elem).contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, ''),
+            $(elem).next().contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, ''),
+          ], '\n'),
+          pinyin: _.join([
+            $(elem).find('.pinyin').text().trim(),
+            $(elem).next().find('.pinyin').text().trim(),
+          ], '\n'),
+          trans: _.join([
+            $(elem).find('.trans').text().trim(),
+            $(elem).next().find('.trans').text().trim(),
+          ], '\n'),
+          expl: _.join([
+            $(elem).find('.expl').text().trim(),
+            $(elem).next().find('.expl').text().trim(),
+          ], '\n'),
+        })
+      }
+      return true
+    }
+
     examples.push({
       hanzi: $(elem).contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, ''),
       pinyin: $(elem).find('.pinyin').text().trim(),

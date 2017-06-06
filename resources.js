@@ -48,8 +48,8 @@ function saveDeck(callback) {
     const { examples, level, category, subcategory, title, structure, url } = JSON.parse(data)
     const tags = _.join([level, category, subcategory], ' ')
     examples.forEach(({ hanzi, pinyin, trans, expl }) => {
-      // const row = [hanzi, pinyin, trans, expl, title, structure, url, tags]
-      const row = [hanzi, pinyin, structure]
+      const row = [hanzi, pinyin, trans, expl, title, structure, url, tags]
+      // const row = [hanzi, pinyin]
       writeStream.write(`${_.join(row, '\t')}\n`)
     })
   })
