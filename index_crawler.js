@@ -68,16 +68,22 @@ function parsePage(index, body, callback) {
   const filteredTags = _.filter(
     $("a[href^='/']"),
     link => linkValidator.test(link.attribs.href))
-  const filteredLinks = _.map(filteredTags, tag => tag.attribs.href)
 
   const url = new URL(index)
   const baseUrl = `${url.protocol}//${url.hostname}`
-  const absolutePaths = []
+  const pageDescriptors = []
 
-  _.forEach(filteredLinks, link => {
-    absolutePaths.push(baseUrl + link)
+  _.forEach(filteredTags, tag => {
+    pageDescriptors.push({
+      href: tag.attribs.href,
+      url: baseUrl + tag.attribs.href,
+      title: $(tag).text(),
+      pattern: $(tag).closest('td').next().text(),
+      category: $(tag).closest('.wikitable').prevAll('h2').first().text(),
+      subcategory: $(tag).closest('.wikitable').prev().text(),
+    })
   })
 
-  if (callback) { callback(absolutePaths) }
-  return absolutePaths
+  if (callback) { callback(pageDescriptors) }
+  return pageDescriptors
 }
