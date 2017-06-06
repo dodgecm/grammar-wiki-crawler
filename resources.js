@@ -4,8 +4,6 @@ const request = require('request')
 const fs = require('fs')
 const util = require('util')
 
-let fileIndex = 1
-
 function loadPage(index, callback) {
   const indexHash = crypto.createHash('md5').update(index).digest('hex')
   const cachePath = `cache/${indexHash}.html`
@@ -29,14 +27,36 @@ function loadPage(index, callback) {
 }
 
 function savePage(descriptor, callback) {
-  const cachePath = `output/${_.padStart(fileIndex, 4, '0')}_${descriptor.id}.txt`
-  fileIndex++
-  fs.writeFile(cachePath, util.inspect(descriptor), writeError => {
+  const cachePath = `output/${_.padStart(descriptor.id, 4, '0')}_${descriptor.url_id}.json`
+  fs.writeFile(cachePath, JSON.stringify(descriptor), writeError => {
     if (writeError) { throw writeError }
     console.log(`Wrote ${descriptor.title} to output.`)
     callback()
   })
+
+  const humanReadablePath = `output/${_.padStart(descriptor.id, 4, '0')}_${descriptor.url_id}.txt`
+  fs.writeFile(humanReadablePath, util.inspect(descriptor), () => {})
 }
 
+function saveDeck(callback) {
+  const files = fs.readdirSync('output')
+  _.remove(files, file => !_.endsWith(file, '.json'))
+
+  const writeStream = fs.createWriteStream('output/deck.txt')
+  files.forEach(file => {
+    const data = fs.readFileSync(`output/${file}`)
+    const { examples, level, category, subcategory, title, structure, url } = JSON.parse(data)
+    const tags = _.join([level, category, subcategory], ' ')
+    examples.forEach(({ hanzi, pinyin, trans, expl }) => {
+      // const row = [hanzi, pinyin, trans, expl, title, structure, url, tags]
+      const row = [hanzi, pinyin, structure]
+      writeStream.write(`${_.join(row, '\t')}\n`)
+    })
+  })
+
+  callback()
+}
+
+module.exports.saveDeck = saveDeck
 module.exports.savePage = savePage
 module.exports.loadPage = loadPage

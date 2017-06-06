@@ -21,12 +21,13 @@ function crawlIndexes(indexes) {
   const pageDescriptors = []
   const finishedCallback = _.after(indexes.length, () => {
     content.crawlGrammarPages(pageDescriptors, finishedDescriptors => {
+      const writeDeckCallback = _.after(finishedDescriptors.length, () => {
+        resources.saveDeck(() => {
+          console.log('Done!')
+        })
+      })
       _.forEach(finishedDescriptors, descriptor => {
-        resources.savePage(descriptor,
-          _.after(finishedDescriptors.length, () => {
-            console.log('Done!')
-          }),
-        )
+        resources.savePage(descriptor, writeDeckCallback)
       })
     })
   })
@@ -39,6 +40,7 @@ function crawlIndexes(indexes) {
   })
 }
 
+let pageId = 1
 function parseIndexPage(index, body, callback) {
   // Parse the document body
   const $ = cheerio.load(body)
@@ -54,14 +56,16 @@ function parseIndexPage(index, body, callback) {
 
   _.forEach(filteredTags, tag => {
     pageDescriptors.push({
-      id: tag.attribs.href.substring(tag.attribs.href.length - 8),
+      id: pageId,
+      url_id: tag.attribs.href.substring(tag.attribs.href.length - 8),
       href: tag.attribs.href,
       url: baseUrl + tag.attribs.href,
       title: $(tag).text(),
       pattern: $(tag).closest('td').next().text(),
-      category: $(tag).closest('.wikitable').prevAll('h2').first().text(),
-      subcategory: $(tag).closest('.wikitable').prev().text(),
+      category: $(tag).closest('.wikitable').prevAll('h2').first().text().replace(/\s+/g, '_'),
+      subcategory: $(tag).closest('.wikitable').prev().text().replace(/\s+/g, ''),
     })
+    pageId++
   })
 
   if (callback) { callback(pageDescriptors) }

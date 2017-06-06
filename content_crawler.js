@@ -24,6 +24,14 @@ function parseIndexPage(index, body, descriptor, callback) {
 
   const examples = []
   $('.liju li').each((i, elem) => {
+    // Filter out examples of right vs wrong grammar segments, etc
+    if ($(elem).hasClass('x') ||
+    $(elem).hasClass('o') ||
+    $(elem).parents().hasClass('liju-en')) {
+      console.log('Filtered out', $(elem).text())
+      return true
+    }
+
     examples.push({
       hanzi: $(elem).contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, ''),
       pinyin: $(elem).find('.pinyin').text().trim(),
