@@ -54,6 +54,7 @@ function parseIndexPage(index, body, callback) {
 
   _.forEach(filteredTags, tag => {
     pageDescriptors.push({
+      id: tag.attribs.href.substring(tag.attribs.href.length - 8),
       href: tag.attribs.href,
       url: baseUrl + tag.attribs.href,
       title: $(tag).text(),
