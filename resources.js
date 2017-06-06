@@ -1,6 +1,7 @@
 const crypto = require('crypto')
 const request = require('request')
 const fs = require('fs')
+const util = require('util')
 
 function loadPage(index, callback) {
   const indexHash = crypto.createHash('md5').update(index).digest('hex')
@@ -25,4 +26,15 @@ function loadPage(index, callback) {
   })
 }
 
+function savePage(descriptor, callback) {
+  const indexHash = crypto.createHash('md5').update(descriptor.url).digest('hex')
+  const cachePath = `output/${indexHash}.txt`
+  fs.writeFile(cachePath, util.inspect(descriptor), writeError => {
+    if (writeError) { throw writeError }
+    console.log(`Wrote ${cachePath} to output.`)
+    callback()
+  })
+}
+
+module.exports.savePage = savePage
 module.exports.loadPage = loadPage

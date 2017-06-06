@@ -1,15 +1,21 @@
 const _ = require('lodash')
 const cheerio = require('cheerio')
 const resources = require('./resources')
+const merge = require('merge')
 
 function crawlGrammarPages(descriptors, callback) {
+  const pageDescriptors = []
   const finishedCallback = _.after(descriptors.length, () => {
-    callback()
+    callback(pageDescriptors)
   })
 
   _.forEach(descriptors, descriptor => {
     resources.loadPage(descriptor.url,
-      _.partialRight(parseIndexPage, descriptor, finishedCallback))
+      _.partialRight(parseIndexPage, descriptor, newDescriptor => {
+        pageDescriptors.push(newDescriptor)
+        finishedCallback()
+      }),
+    )
   })
 }
 
@@ -32,8 +38,8 @@ function parseIndexPage(index, body, descriptor, callback) {
     summary: $('#mw-content-text p').first().text().trim(),
     examples,
   }
-  console.log(details)
-  callback()
+
+  callback(merge(descriptor, details))
 }
 
 module.exports.crawlGrammarPages = crawlGrammarPages

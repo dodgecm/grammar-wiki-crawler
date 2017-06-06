@@ -20,8 +20,14 @@ crawlIndexes([DEBUG_URL])
 function crawlIndexes(indexes) {
   const pageDescriptors = []
   const finishedCallback = _.after(indexes.length, () => {
-    content.crawlGrammarPages(pageDescriptors, () => {
-      console.log('Done!')
+    content.crawlGrammarPages(pageDescriptors, finishedDescriptors => {
+      _.forEach(finishedDescriptors, descriptor => {
+        resources.savePage(descriptor,
+          _.after(finishedDescriptors.length, () => {
+            console.log('Done!')
+          }),
+        )
+      })
     })
   })
 
