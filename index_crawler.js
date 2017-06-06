@@ -12,7 +12,9 @@ const INDEX_URLS = [
   'https://resources.allsetlearning.com/chinese/grammar/C1_grammar_points',
 ]
 
-const DEBUG_URL = 'https://resources.allsetlearning.com/chinese/grammar/A1_grammar_points'
+const DEBUG_URL = 'https://resources.allsetlearning.com/chinese/grammar/B1_grammar_points'
+const DEBUG_PAGE = 'https://resources.allsetlearning.com/chinese/grammar/ASGV55Y4'
+const DEBUG_SINGLE_PAGE = false
 
 // crawlIndexes(INDEX_URLS)
 crawlIndexes([DEBUG_URL])
@@ -20,6 +22,10 @@ crawlIndexes([DEBUG_URL])
 function crawlIndexes(indexes) {
   const pageDescriptors = []
   const finishedCallback = _.after(indexes.length, () => {
+    if (DEBUG_SINGLE_PAGE) {
+      _.remove(pageDescriptors, page => page.url !== DEBUG_PAGE)
+    }
+
     content.crawlGrammarPages(pageDescriptors, finishedDescriptors => {
       const writeDeckCallback = _.after(finishedDescriptors.length, () => {
         resources.saveDeck(() => {
