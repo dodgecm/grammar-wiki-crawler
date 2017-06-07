@@ -75,6 +75,7 @@ function parseIndexPage(index, body, descriptor, callback) {
             pinyin: _.join(_.slice(dialogueSegments['.pinyin'], i, end), '<br />'),
             trans: _.join(_.slice(dialogueSegments['.trans'], i, end), '<br />'),
             expl: _.join(_.slice(dialogueSegments['.expl'], i, end), ''),
+            structure: $(elem).closest('.liju').prevAll('.jiegou').first().text().trim().replace(/\r?\n|\r/g, '<br />'),
           })
         }
       }
@@ -82,11 +83,11 @@ function parseIndexPage(index, body, descriptor, callback) {
     }
 
     const example = {
-      hanzi: $(elem).contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, ''),
+      hanzi: $(elem).contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, '').replace(/<\/span>/, ''),
       pinyin: $(elem).find('.pinyin').text().trim(),
       trans: $(elem).find('.trans').text().trim(),
       expl: $(elem).find('.expl').text().trim(),
-      structure: $(elem).closest('.liju').prevAll('.jiegou').first().text().trim(),
+      structure: $(elem).closest('.liju').prevAll('.jiegou').first().text().trim().replace(/\r?\n|\r/g, '<br />'),
     }
 
     if (example.trans.length === 0 || example.hanzi.length === 0) {

@@ -65,8 +65,17 @@ function saveDeck(callback) {
     const { examples, level, category, subcategory, title, url } = JSON.parse(data)
     const tags = _.join([level, category, subcategory], ' ')
     examples.forEach(({ hanzi, pinyin, trans, expl, structure }) => {
-      // const row = [hanzi, pinyin, trans, expl, title, structure, url, tags]
-      const row = [hanzi, trans, structure]
+      // We need tabs to be removed so that Anki can import properly
+      const row = _.map(
+        [hanzi, pinyin, trans, expl, title, structure, url, tags],
+        item => {
+          const sanitized = item.replace(/[“”]/g, '"').replace('\t', ' ')
+          // Apparently Anki has issues with uneven numbers of quotes
+          const quoteCount = sanitized.split('"').length - 1
+          return (quoteCount % 2 === 1) ? sanitized.replace('"', '') : sanitized
+        },
+      )
+
       writeStream.write(`${_.join(row, '\t')}\n`)
     })
   })
