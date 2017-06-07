@@ -12,9 +12,14 @@ const INDEX_URLS = [
   'https://resources.allsetlearning.com/chinese/grammar/C1_grammar_points',
 ]
 
-const DEBUG_URL = 'https://resources.allsetlearning.com/chinese/grammar/A1_grammar_points'
-const DEBUG_PAGE = 'https://resources.allsetlearning.com/chinese/grammar/ASGV55Y4'
+const DEBUG_URL = 'https://resources.allsetlearning.com/chinese/grammar/C1_grammar_points'
+const DEBUG_PAGE = 'https://resources.allsetlearning.com/chinese/grammar/ASGG4BX9'
 const DEBUG_SINGLE_PAGE = false
+
+// List of URLS that with incomplete content that we don't want to include
+const BLACKLIST_URLS = [
+  'https://resources.allsetlearning.com/chinese/grammar/ASGH4A7W',
+]
 
 // crawlIndexes(INDEX_URLS)
 crawlIndexes([DEBUG_URL])
@@ -25,6 +30,7 @@ function crawlIndexes(indexes) {
     if (DEBUG_SINGLE_PAGE) {
       _.remove(pageDescriptors, page => page.url !== DEBUG_PAGE)
     }
+    _.remove(pageDescriptors, page => _.includes(BLACKLIST_URLS, page.url))
 
     content.crawlGrammarPages(pageDescriptors, finishedDescriptors => {
       const writeDeckCallback = _.after(finishedDescriptors.length, () => {

@@ -62,11 +62,11 @@ function saveDeck(callback) {
   const writeStream = fs.createWriteStream('output/deck.txt')
   files.forEach(file => {
     const data = fs.readFileSync(`output/${file}`)
-    const { examples, level, category, subcategory, title, structure, url } = JSON.parse(data)
+    const { examples, level, category, subcategory, title, url } = JSON.parse(data)
     const tags = _.join([level, category, subcategory], ' ')
-    examples.forEach(({ hanzi, pinyin, trans, expl }) => {
-      const row = [hanzi, pinyin, trans, expl, title, structure, url, tags]
-      // const row = [hanzi, trans, title]
+    examples.forEach(({ hanzi, pinyin, trans, expl, structure }) => {
+      // const row = [hanzi, pinyin, trans, expl, title, structure, url, tags]
+      const row = [hanzi, trans, structure]
       writeStream.write(`${_.join(row, '\t')}\n`)
     })
   })
