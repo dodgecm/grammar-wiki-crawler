@@ -69,7 +69,7 @@ function saveDeck(callback) {
       const row = _.map(
         [hanzi, pinyin, trans, expl, title, structure, url, tags],
         item => {
-          const sanitized = item.replace(/[“”]/g, '"').replace('\t', ' ')
+          const sanitized = item.replace(/[“”]/g, '"').replace('\t', ' ').replace(/\r?\n|\r/g, '')
           // Apparently Anki has issues with uneven numbers of quotes
           const quoteCount = sanitized.split('"').length - 1
           return (quoteCount % 2 === 1) ? sanitized.replace('"', '') : sanitized

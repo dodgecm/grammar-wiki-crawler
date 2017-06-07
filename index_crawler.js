@@ -21,8 +21,8 @@ const BLACKLIST_URLS = [
   'https://resources.allsetlearning.com/chinese/grammar/ASGH4A7W',
 ]
 
-// crawlIndexes(INDEX_URLS)
-crawlIndexes([DEBUG_URL])
+crawlIndexes(INDEX_URLS)
+// crawlIndexes([DEBUG_URL])
 
 function crawlIndexes(indexes) {
   const pageDescriptors = []
