@@ -64,11 +64,12 @@ function saveDeck(callback) {
     const data = fs.readFileSync(`output/${file}`)
     const { examples, level, category, subcategory, title, url } = JSON.parse(data)
     const tags = _.join([level, category, subcategory], ' ')
-    examples.forEach(({ hanzi, pinyin, trans, expl, structure }) => {
+    examples.forEach(({ hanzi, pinyin, trans, expl, structure, exampleType }) => {
       // We need tabs to be removed so that Anki can import properly
       const row = _.map(
-        [hanzi, pinyin, trans, expl, title, structure, url, tags],
+        [hanzi, pinyin, trans, expl, exampleType, title, structure, url, tags],
         item => {
+          if (item === undefined) { console.log(row) }
           const sanitized = item.replace(/[“”]/g, '"').replace('\t', ' ').replace(/\r?\n|\r/g, '')
           // Apparently Anki has issues with uneven numbers of quotes
           const quoteCount = sanitized.split('"').length - 1

@@ -24,10 +24,8 @@ function parseIndexPage(index, body, descriptor, callback) {
 
   const examples = []
   $('.liju li').each((i, elem) => {
-    // Filter out examples of right vs wrong grammar segments, etc
-    if ($(elem).hasClass('x') ||
-    $(elem).hasClass('o') ||
-    $(elem).parents().hasClass('liju-en') ||
+    // Filter out segments that are ads, or english examples
+    if ($(elem).parents().hasClass('liju-en') ||
     $(elem).children('a').length > 0) {
       console.log('Filtered out', $(elem).text(), descriptor.title)
       return true
@@ -42,7 +40,7 @@ function parseIndexPage(index, body, descriptor, callback) {
         !multilineDialogExp.test(elementText))) {
       // We filter out the second person's line to combine the dialogue into one card
       if ($(elem).prev().length !== 0) {
-        console.log('Dialogue combined for', $(elem).text(), descriptor.title)
+        // console.log('Dialogue combined for', $(elem).text(), descriptor.title)
       } else {
         const dialogueSegments = { hanzi: [], '.pinyin': [], '.trans': [], '.expl': [] }
         const terms = ['.pinyin', '.trans', '.expl']
@@ -76,11 +74,16 @@ function parseIndexPage(index, body, descriptor, callback) {
             trans: _.join(_.slice(dialogueSegments['.trans'], i, end), '<br />'),
             expl: _.join(_.slice(dialogueSegments['.expl'], i, end), ''),
             structure: $(elem).closest('.liju').prevAll('.jiegou').first().text().trim().replace(/\r?\n|\r/g, '<br />'),
+            exampleType: '',
           })
         }
       }
       return true
     }
+
+    let exampleType = ''
+    if ($(elem).hasClass('x')) { exampleType = 'invalid' }
+    else if ($(elem).hasClass('o')) { exampleType = 'valid' }
 
     const example = {
       hanzi: $(elem).contents().not('.pinyin, .trans, .expl').text().replace(/\s+/g, '').replace(/<\/span>/, ''),
@@ -88,9 +91,12 @@ function parseIndexPage(index, body, descriptor, callback) {
       trans: $(elem).find('.trans').text().trim(),
       expl: $(elem).find('.expl').text().trim(),
       structure: $(elem).closest('.liju').prevAll('.jiegou').first().text().trim().replace(/\r?\n|\r/g, '<br />'),
+      exampleType,
     }
 
-    if (example.trans.length === 0 || example.hanzi.length === 0) {
+    const isExample = $(elem).hasClass('x') || $(elem).hasClass('o')
+    if ((!isExample && example.trans.length === 0) ||
+      example.hanzi.length === 0) {
       console.log('Missing fields for', $(elem).text(), descriptor.title)
       return true
     }
