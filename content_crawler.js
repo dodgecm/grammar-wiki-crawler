@@ -3,20 +3,19 @@ const cheerio = require('cheerio')
 const resources = require('./resources')
 const merge = require('merge')
 
-function crawlGrammarPages(descriptors, callback) {
-  const pageDescriptors = []
-  const finishedCallback = _.after(descriptors.length, () => {
-    callback(pageDescriptors)
-  })
-
-  _.forEach(descriptors, descriptor => {
-    resources.loadPage(descriptor.url,
-      _.partialRight(parseIndexPage, descriptor, newDescriptor => {
-        pageDescriptors.push(newDescriptor)
-        finishedCallback()
-      }),
-    )
-  })
+function crawlGrammarPages(pages, callback, parsedPages = []) {
+  const nextPage = pages.shift()
+  console.log('Processing', nextPage.title)
+  resources.loadPage(nextPage.url,
+    _.partialRight(parseIndexPage, nextPage, newDescriptor => {
+      parsedPages.push(newDescriptor)
+      if (pages.length > 0) {
+        crawlGrammarPages(pages, callback, parsedPages)
+      } else {
+        callback(parsedPages)
+      }
+    }),
+  )
 }
 
 function parseIndexPage(index, body, descriptor, callback) {
