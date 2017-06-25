@@ -24,31 +24,36 @@ const BLACKLIST_URLS = [
 crawlIndexes(INDEX_URLS)
 // crawlIndexes([DEBUG_URL])
 
-function crawlIndexes(indexes) {
-  const pageDescriptors = []
-  const finishedCallback = _.after(indexes.length, () => {
-    if (DEBUG_SINGLE_PAGE) {
-      _.remove(pageDescriptors, page => page.url !== DEBUG_PAGE)
-    }
-    _.remove(pageDescriptors, page => _.includes(BLACKLIST_URLS, page.url))
+function crawlIndexes(indexes, pageDescriptors = []) {
+  const nextPage = indexes.shift()
+  resources.loadPage(
+    nextPage,
+    _.partialRight(parseIndexPage, descriptors => {
+      pageDescriptors.push(...descriptors)
+      if (indexes.length > 0) {
+        crawlIndexes(indexes, pageDescriptors)
+      } else {
+        crawlGrammarPages(pageDescriptors)
+      }
+    }),
+  )
+}
 
-    content.crawlGrammarPages(pageDescriptors, finishedDescriptors => {
-      const writeDeckCallback = _.after(finishedDescriptors.length, () => {
-        resources.saveDeck(() => {
-          console.log('Done!')
-        })
-      })
-      _.forEach(finishedDescriptors, descriptor => {
-        resources.savePage(descriptor, writeDeckCallback)
+function crawlGrammarPages(pageDescriptors) {
+  if (DEBUG_SINGLE_PAGE) {
+    _.remove(pageDescriptors, page => page.url !== DEBUG_PAGE)
+  }
+  _.remove(pageDescriptors, page => _.includes(BLACKLIST_URLS, page.url))
+
+  content.crawlGrammarPages(pageDescriptors, finishedDescriptors => {
+    const writeDeckCallback = _.after(finishedDescriptors.length, () => {
+      resources.saveDeck(() => {
+        console.log('Done!')
       })
     })
-  })
-
-  _.forEach(indexes, index => {
-    resources.loadPage(index, _.partialRight(parseIndexPage, descriptors => {
-      pageDescriptors.push(...descriptors)
-      finishedCallback()
-    }))
+    _.forEach(finishedDescriptors, descriptor => {
+      resources.savePage(descriptor, writeDeckCallback)
+    })
   })
 }
 
