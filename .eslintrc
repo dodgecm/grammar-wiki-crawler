@@ -1,64 +1,8 @@
 {
-  "extends": "airbnb",
-
-  "parser": "babel-eslint",
-
-  "plugins": [
-    "babel"
-  ],
-
-  "rules": {
-    "semi": [2, "never"],
-    "no-trailing-spaces": [2, { "skipBlankLines": true }],
-    "default-case": 0,
-    "no-unused-expressions": [2, {
-      "allowShortCircuit": true,
-      "allowTernary": true
-    }],
-    "no-shadow": 0,
-    "no-console": 0,
-    "new-cap": 0,
-    "func-names": 0,
-    "no-use-before-define": 0,
-    "newline-per-chained-call": 0,
-    "no-confusing-arrow": 0,
-    "consistent-return": 0,
-    "object-shorthand": 0,
-    "brace-style": 0,
-    "no-lone-blocks": 0,
-    "no-return-assign": 0,
-    "no-plusplus": 0,
-    "global-require": 0,
-    "generator-star-spacing": 0,
-    "no-underscore-dangle": 0,
-    "class-methods-use-this": 0,
-    "arrow-parens": [2, "as-needed"],
-    "no-continue": 0,
-    "radix": 0,
-
-    "import/no-extraneous-dependencies": 0,
-    "import/no-named-as-default": 0,
-    "import/no-unresolved": 0,
-    "import/prefer-default-export": 0,
-    "import/extensions": 0,
-    "import/newline-after-import": 0,
-
-    "react/jsx-closing-bracket-location": [1, "after-props"],
-    "react/jsx-filename-extension": 0,
-    "react/forbid-prop-types": 0,
-    "react/prefer-stateless-function": [1, { "ignorePureComponents": true }],
-  },
-
-  "ecmaFeatures": {
-    "experimentalObjectRestSpread": true
-  },
-
-  "globals": {
-    "Modernizr": false,
-
-    "__SERVER__": false,
-    "__DEV__": false,
-
-    "fetch": false
-  }
+    "plugins": ["node"],
+    "extends": ["eslint:recommended", "plugin:node/recommended"],
+    "rules": {
+        "node/exports-style": ["error", "module.exports"],
+        "no-console": 0
+    }
 }

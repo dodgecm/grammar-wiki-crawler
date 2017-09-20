@@ -12,7 +12,7 @@ const INDEX_URLS = [
   'https://resources.allsetlearning.com/chinese/grammar/C1_grammar_points',
 ]
 
-const DEBUG_URL = 'https://resources.allsetlearning.com/chinese/grammar/B1_grammar_points'
+// const DEBUG_URL = 'https://resources.allsetlearning.com/chinese/grammar/B1_grammar_points'
 const DEBUG_PAGE = 'https://resources.allsetlearning.com/chinese/grammar/ASGN1JR5'
 const DEBUG_SINGLE_PAGE = false
 
@@ -35,7 +35,7 @@ function crawlIndexes(indexes, pageDescriptors = []) {
       } else {
         crawlGrammarPages(pageDescriptors)
       }
-    }),
+    })
   )
 }
 

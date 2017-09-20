@@ -14,7 +14,7 @@ function crawlGrammarPages(pages, callback, parsedPages = []) {
       } else {
         callback(parsedPages)
       }
-    }),
+    })
   )
 }
 
